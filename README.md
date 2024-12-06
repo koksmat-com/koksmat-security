@@ -1,158 +1,108 @@
 # Koksmat Security
 
-Welcome to the **Koksmat Security** repository! This project aims to provide a comprehensive collection of tools, scripts, and automation workflows to help organizations ensure they follow the best security practices across their development and operational environments.
+Welcome to the **Koksmat Security** repository! This project provides a suite of PowerShell scripts and tools designed to help organizations automate and maintain best security practices across their GitHub repositories. Each script is crafted to address specific tasks, from repository management to vulnerability scanning, ensuring a streamlined approach to security.
 
 ---
 
-## **Ambition**
+## **Scripts Overview**
 
-The goal of **Koksmat Security** is to simplify and automate the implementation of security best practices for both developers and system administrators. By centralizing tools and scripts in one repository, we aim to:
+### **1. `clone-repos.ps1`**
 
-- **Ensure Compliance**: Help teams align with industry-standard security guidelines.
-- **Automate Security Checks**: Provide workflows to detect and mitigate vulnerabilities proactively.
-- **Educate and Empower**: Offer easy-to-use resources for maintaining secure environments.
-- **Standardize Practices**: Establish repeatable, auditable processes for security across all projects.
+This script automates the cloning of repositories listed in an input file. It reads the repository names from `clone-repos.txt` and clones them into a designated directory. Use this script to create local copies of repositories for further analysis or modification.
+
+- **Input:** `clone-repos.txt` (list of repositories, one per line).
+- **Output:** Cloned repositories in the specified directory.
 
 ---
 
-## **Features**
+### **2. `get-repos.ps1`**
 
-### **1. Security Tools**
+Fetches a list of repositories from a GitHub organization and saves them into an output file. This script simplifies the process of retrieving repository information and ensures up-to-date records.
 
-A curated set of tools for various security tasks:
+- **Input:** None (uses GitHub CLI to fetch repositories from the organization).
+- **Output:** `repos.txt` (list of repositories).
 
-- Secret scanning (e.g., GitLeaks, TruffleHog)
-- Vulnerability analysis (e.g., OWASP ZAP, Snyk)
-- Dependency management (e.g., npm audit, pip-audit)
+---
 
-### **2. Automation Scripts**
+### **3. `gitleaks-install.ps1`**
 
-Scripts to automate security tasks, including:
+Checks whether `gitleaks` is installed on the system and installs it if it is not. This script ensures you have the necessary toolset for scanning repositories for sensitive information without manual installation steps.
 
-- Repository scanning for sensitive information.
-- Automated fixes for common vulnerabilities.
-- CI/CD pipeline integrations for real-time checks.
+- **Input:** None.
+- **Output:** Installs `gitleaks` if not already available.
 
-### **3. Best Practice Templates**
+---
 
-Pre-configured templates for:
+### **4. `gitleaks-scan.ps1`**
 
-- GitHub Actions workflows (e.g., secret scanning, dependency checks).
-- Configuration files for popular security tools.
-- Infrastructure-as-code security policies.
+Runs `gitleaks` on cloned repositories to identify sensitive information, such as exposed API keys or secrets. The script generates individual reports for each repository and consolidates the results into a combined JSON report.
 
-### **4. Reports and Dashboards**
+- **Input:** `<INPUT_DIRECTORY>` (directory containing cloned repositories).
+- **Output:**
+  - Individual reports: `<OUTPUT_DIRECTORY>/repo-name-gitleaks.json`.
+  - Combined report: `<OUTPUT_FILE>` (e.g., `gitleaks-report.json`).
 
-Generate reports to track and visualize:
+---
 
-- Scanned repositories and findings.
-- Compliance with organizational policies.
-- Trends in fixing vulnerabilities over time.
+### **5. `make-private.ps1`**
+
+Reads a list of repositories from an input file and ensures they are private. If any repository is found to be public, this script updates its visibility to private using the GitHub CLI.
+
+- **Input:** `repos-makeprivate.txt` (list of repositories, one per line).
+- **Output:** Updated repository visibility.
+
+---
+
+## **Folder Structure**
+
+```
+.
+├── README.md               # This documentation file
+└── github
+    ├── clone-repos.ps1     # Clones repositories from a list
+    ├── get-repos.ps1       # Retrieves a list of repositories from GitHub
+    ├── gitleaks-install.ps1 # Installs Gitleaks if not installed
+    ├── gitleaks-scan.ps1   # Scans repositories for sensitive information
+    └── make-private.ps1    # Ensures repositories are private
+```
 
 ---
 
 ## **Getting Started**
 
-### **Prerequisites**
+1. **Set Up Dependencies:**
 
-To use the tools and scripts in this repository, you’ll need:
+   - Install GitHub CLI (`gh`): [GitHub CLI Installation Guide](https://cli.github.com/manual/installation).
+   - Install `gitleaks`: Run `gitleaks-install.ps1` or download manually from [Gitleaks](https://github.com/gitleaks/gitleaks).
 
-- **GitHub CLI (`gh`)**: For repository management and automation.
-- **Docker**: For containerized tools and scripts.
-- **PowerShell / Bash**: For running automation scripts.
-- Access to GitHub Advanced Security features (if available).
+2. **Configure GitHub Authentication:**
 
-### **Installation**
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/koksmat-com/koksmat-security.git
-   cd koksmat-security
-   ```
-
-2. Install dependencies using the provided setup script:
-
-   ```bash
-   ./setup.sh # For Linux/macOS
-   ./setup.ps1 # For Windows
-   ```
-
-3. Configure your environment:
-   - Add required environment variables (see `.env.example`).
-   - Authenticate with GitHub CLI:
+   - Authenticate GitHub CLI:
      ```bash
      gh auth login
      ```
 
----
-
-## **Usage**
-
-### **Scan Repositories**
-
-Run a secret scanning workflow for all repositories in your organization:
-
-```bash
-./scripts/scan-repos.ps1
-```
-
-### **Run Dependency Checks**
-
-Check for vulnerabilities in your project dependencies:
-
-```bash
-./scripts/dependency-check.sh
-```
-
-### **Generate Reports**
-
-Produce a consolidated security report:
-
-```bash
-./scripts/generate-report.sh
-```
+3. **Run Scripts in Sequence:**
+   - Use `get-repos.ps1` to fetch repository names.
+   - Use `clone-repos.ps1` to clone repositories locally.
+   - Use `gitleaks-scan.ps1` to scan for sensitive data.
+   - Use `make-private.ps1` to ensure repositories are private.
 
 ---
 
 ## **Contributing**
 
-We welcome contributions to expand and improve this repository! Please follow these steps:
+We welcome contributions to enhance and expand this repository! Please follow these steps:
 
 1. Fork the repository.
 2. Create a new branch:
    ```bash
    git checkout -b feature/your-feature-name
    ```
-3. Commit your changes and open a pull request.
-
-Check the [CONTRIBUTING.md](CONTRIBUTING.md) file for more details.
-
----
-
-## **Roadmap**
-
-- [ ] Add integrations with cloud security tools (AWS, Azure, GCP).
-- [ ] Include support for container security (e.g., Docker image scanning).
-- [ ] Extend scripts for GitHub Advanced Security configurations.
-- [ ] Add templates for Kubernetes RBAC and policy configurations.
+3. Submit a pull request with your changes.
 
 ---
 
 ## **License**
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
-## **Contact**
-
-If you have any questions or suggestions, feel free to open an issue or reach out to us:
-
-- **Project Owner**: Niels Gregers Johansen
-- **Email**: [niels@jumpto365.com](mailto:niels@jumpto365.com)
-- **Website**: [koksmat.com](https://koksmat.com)
-
----
-
-By consolidating security practices into one accessible repository, **Koksmat Security** aims to help teams secure their applications and infrastructure with confidence. Let’s build a safer digital world together!
